@@ -10,8 +10,6 @@ The purpose of this project is to demonstrate a prototype smart battery thermal 
 The repository is organised into separate folders for each subsystem, as well as an integrated system folder. Each subsystem folder contains the files related to that specific part of the project.
 
 ```text
-Smart-Battery-Thermal-Regulation-System/
-│
 ├── Housing_and_Heating_Subsystem/
 │
 ├── Power_Management_Subsystem/
