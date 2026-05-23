@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Antarctic Battery Monitoring Dashboard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="app-wrapper">
+
+        <!-- Main content -->
+        <main class="main-area">
+
+            <div class="global-header">
+                <div class="centered-title">Antarctic Battery Monitoring Dashboard</div>
+                <div class="centered-sub">Telemetry and Control Interface</div>
+            </div>
+
+                        <!-- ADDED: Low Power Mode Warning Banner -->
+                <div id="lowPowerWarning" style="display: none; background: linear-gradient(135deg, #dc3545, #b02a37); color: white; text-align: center; padding: 6px 10px; margin-bottom: 10px; border-radius: 8px; font-weight: 500; letter-spacing: 0.3px; font-size: 0.72rem; line-height: 1.2;">
+                    ⚠️ SYSTEM IN LOW POWER MODE - Cannot change power mode until system exits Low Power mode
+                </div>
+                
+            <!-- Live telemetry -->
+            <section class="cards-section">
+                <div class="section-label">Live Telemetry</div>
+
+                <div class="cards-grid">
+
+                    <div class="card glass-card">
+                        <div class="card-label">Inside Temperature</div>
+                        <div class="card-value" id="insideTemp">-- °C</div>
+                    </div>
+
+                    <div class="card glass-card">
+                        <div class="card-label">Outside Temperature</div>
+                        <div class="card-value" id="outsideTemp">-- °C</div>
+                    </div>
+
+                    <div class="card glass-card">
+                        <div class="card-label">Battery Voltage</div>
+                        <div class="card-value" id="batteryVoltage">-- V</div>
+                    </div>
+
+                    <div class="card glass-card">
+                        <div class="card-label">State of Charge</div>
+                        <div class="card-value" id="soc">-- %</div>
+                    </div>
+
+                    <div class="card glass-card">
+                        <div class="card-label">Heater Status</div>
+                        <div class="card-value" id="heaterStatusDisplay">
+                            <span class="neon-badge heater-off" id="heaterStatusText">OFF</span>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Temperature chart -->
+            <section class="graph-section temp-graph-section">
+                <div class="section-label">Temperature vs Time</div>
+
+                <div class="chart-container glass-card temp-chart-wrapper">
+                    <canvas id="tempChart" height="180"></canvas>
+                </div>
+            </section>
+
+            <!-- Other charts -->
+            <div class="two-graphs">
+
+                <section class="graph-section half">
+                    <div class="section-label">State of Charge vs Time</div>
+
+                    <div class="chart-container glass-card">
+                        <canvas id="socChart" height="160"></canvas>
+                    </div>
+                </section>
+
+                <section class="graph-section half">
+                    <div class="section-label">Heater Status Timeline</div>
+
+                    <div class="chart-container glass-card">
+                        <canvas id="heaterChart" height="160"></canvas>
+                    </div>
+                </section>
+
+            </div>
+
+        </main>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="sidebar-block glass-panel">
+                <div class="sidebar-title">System Status</div>
+
+                <div class="status-list">
+
+                    <div class="status-row">
+                        <span class="status-label">Power Mode</span>
+                        <span class="status-value" id="powerMode">--</span>
+                    </div>
+
+                    <div class="status-row">
+                        <span class="status-label">Backend</span>
+                        <span class="status-value" id="commStatus">Connected</span>
+                    </div>
+                    
+                    <div class="status-row">
+                        <span class="status-label">Signal RSSI</span>
+                        <span class="status-value" id="rssiValue">-- dBm</span>
+                    </div>
+
+                    <div class="status-row">
+                        <span class="status-label">Last Update</span>
+                        <span class="status-value" id="lastUpdate">--:--:--</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="sidebar-block glass-panel">
+                <div class="sidebar-title">Control Panel</div>
+
+                <div class="button-stack">
+
+                    <!-- Power Mode is now above Heater Control -->
+                    <div class="control-group">
+                        <div class="control-label">Power Mode</div>
+
+                        <div class="mode-selector-group">
+                            <select id="powerModeSelect" class="mode-dropdown">
+                                <option value="Normal">Normal Mode</option>
+                                <option value="Low Power">Low Power Mode</option>
+                            </select>
+
+                            <button class="neon-btn apply-btn" id="btnApplyMode">
+                                Apply
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Heater Control -->
+                    <div class="control-group">
+                        <div class="control-label">Heater Control</div>
+
+                        <div id="heaterSwitch" class="heater-switch heater-switch-off" aria-label="Heater control switch">
+
+                            <div class="heater-switch-slider"></div>
+
+                            <button type="button" id="heaterOnOption" class="heater-switch-option">
+                                <span class="status-dot"></span>
+                                <span>Heater On</span>
+                            </button>
+
+                            <button type="button" id="heaterOffOption" class="heater-switch-option active-option">
+                                <span class="status-dot"></span>
+                                <span>Heater Off</span>
+                            </button>
+
+                        </div>
+
+                        <div id="heaterNote" class="heater-note">
+                            Power/Heater control unavailable in Low Power mode
+                        </div>
+                    </div>
+
+                    <!-- CSV Download -->
+                    <button class="neon-btn download-btn" id="btnDownloadCsv">
+                        ⬇ Export Telemetry Data
+                    </button>
+
+                    <!-- Shutdown -->
+                    <button class="neon-btn danger-btn" id="btnShutdown">
+                        ⚠️ Shutdown System
+                    </button>
+
+                </div>
+            </div>
+
+            <div class="sidebar-block glass-panel note-box">
+                <div class="sidebar-title">System Note</div>
+
+                <p class="note-text">
+                    Telemetry values are read from the backend server.
+                    Historical charts are currently shown using sample data.
+                </p>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
