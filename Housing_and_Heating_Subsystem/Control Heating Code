@@ -1,0 +1,60 @@
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+// Data wire is connected to GPIO 4
+#define ONE_WIRE_BUS 4
+#define MOSFET_PIN 12 // pin that is connected to the gate of mosfet 
+
+// Setup a oneWire instance
+OneWire oneWire(ONE_WIRE_BUS);
+
+// Pass oneWire reference to DallasTemperature library
+DallasTemperature sensors(&oneWire);
+
+void setup() {
+  Serial.begin(115200); 
+  pinMode(MOSFET_PIN, OUTPUT);
+  digitalWrite(MOSFET_PIN, LOW); // Start with heater off
+  sensors.begin();
+  
+  // Check how many sensors are actually connected
+  Serial.print("Locating devices...");
+  Serial.print("Found ");
+  Serial.print(sensors.getDeviceCount(), DEC);
+  Serial.println(" devices.");
+}
+
+void loop() {
+  sensors.requestTemperatures(); // Send command to get temperatures from ALL sensors
+
+  // Get temperatures by index
+ 
+  float batteryTemp = sensors.getTempCByIndex(1);  // measures ambient temp 
+  float ambientTemp = sensors.getTempCByIndex(0); // measure battery temp
+
+  // Check for connection errors (-127.00 means the sensor is unplugged)
+  if (batteryTemp == DEVICE_DISCONNECTED_C || ambientTemp == DEVICE_DISCONNECTED_C) {
+    Serial.println("Error: Could not read temperature data");
+    digitalWrite(MOSFET_PIN, LOW); //  Turn off heater if sensor fails
+    return;
+  }
+  //  Display
+  Serial.print("Battery: ");
+  Serial.print(batteryTemp);
+  Serial.print(" °C | Ambient: ");
+  Serial.print(ambientTemp);
+  Serial.println(" °C");
+
+  // Logic for Battery Heater 
+  
+  if (batteryTemp < 1.3) { 
+    digitalWrite(MOSFET_PIN, HIGH); // switch on heater 
+    Serial.println(">> HEATER ON (Battery too cold)");
+  } 
+  
+  else if (batteryTemp > 5.0) {
+    digitalWrite(MOSFET_PIN, LOW); // switch off heater 
+    Serial.println(">> HEATER OFF (Safe temperature)");
+  } 
+  delay(2000); // 2-second delay is better for DS18B20 stability
+}
