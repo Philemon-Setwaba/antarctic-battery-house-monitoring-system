@@ -11,7 +11,6 @@ This subsystem is responsible for protecting the battery and helping maintain it
 This folder may include:
 
 - Housing design files
-- 3D printing files
 - Heating element control files
 - Temperature sensor files
 - Testing evidence
