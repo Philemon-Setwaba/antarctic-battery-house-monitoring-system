@@ -8,7 +8,7 @@ This subsystem is responsible for supplementing the battery supply by harvesting
 
 ## Contents
 
-This folder may include:
+This folder includes:
 
 - Turbine design files
 - Piezoelectric disc configuration files
